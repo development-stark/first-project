@@ -1,15 +1,26 @@
 import os
 from flask import Flask
 from flask_cors import CORS
-
+from config import DevelopmentConfig, ProductionConfig
 def create_app():
-    application = Flask(__name__)
-    #CONFIG_TYPE = os.getenv("CONFIG_TYPE", default="config.DevelopmentConfig")
-    #application.config.from_object(CONFIG_TYPE)
+    application = Flask(__name__, static_folder="static", template_folder="templates")
+    
+    try:
+        if os.getenv("ENVIRONMENT") == "development":
+            configuration = DevelopmentConfig
+        else:
+            configuration = ProductionConfig
+    except:
+        print("there was an error in the configuration")
+        raise Exception
+        
+    application.config.from_object(configuration)
+    print(f"Configuration {application.config['FLASK_ENV']}")
+    print(application.config['DEBUG'])
 
     CORS(application, origins=["http://localhost:3000"])
 
-    #from db import db
+    from db import db
 
     #db.init_app(application)
     #migrate = Migrate(application, db)
